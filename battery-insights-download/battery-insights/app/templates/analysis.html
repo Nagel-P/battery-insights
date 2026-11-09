@@ -1,1 +1,123 @@
-{% extends 'base.html' %}{% block content %}<section class="page-heading"><p class="eyebrow">EXPLORAÇÃO DE DADOS</p><h1>Análise da bateria</h1><p>Resumo estatístico, distribuição das variáveis e correlações da base carregada.</p></section><section class="grid three"><article class="metric"><span>Registros</span><strong id="a-rows">—</strong></article><article class="metric"><span>Variáveis</span><strong id="a-cols">—</strong></article><article class="metric"><span>Variáveis numéricas</span><strong id="a-numeric">—</strong></article></section><section class="panel"><h2>Distribuição de variável</h2><div class="toolbar"><label for="column-select">Variável</label><select id="column-select"></select></div><div id="distribution" class="chart"></div></section><section class="panel"><h2>Matriz de correlação</h2><div id="correlation" class="chart"></div></section><section class="panel"><h2>Prévia dos dados</h2><div class="table-wrap"><table id="preview"></table></div></section>{% endblock %}{% block scripts %}<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>{% endblock %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-heading">
+    <p class="eyebrow">EXPLORAÇÃO DE DADOS</p>
+    <h1>Análise da bateria</h1>
+    <p>Explore os dados carregados, entenda suas distribuições e identifique relações entre as características das baterias.</p>
+</section>
+
+<section class="panel analysis-intro">
+    <div>
+        <p class="eyebrow">GUIA DE ANÁLISE</p>
+        <h2>O que estamos analisando?</h2>
+        <p>
+            Esta página apresenta uma análise exploratória dos dados (EDA).
+            O objetivo é compreender a composição da base, identificar padrões
+            e levantar hipóteses antes de aplicar os algoritmos de Machine Learning.
+        </p>
+    </div>
+    <div class="analysis-warning">
+        <strong>Importante</strong>
+        <p>
+            Os gráficos representam os dados observados, não previsões.
+            Correlação indica associação entre variáveis, mas não comprova
+            uma relação de causa e efeito.
+        </p>
+    </div>
+</section>
+
+<section class="grid three analysis-metrics">
+    <article class="metric">
+        <span>Registros analisados</span>
+        <strong id="a-rows">—</strong>
+        <small>Quantidade de observações</small>
+    </article>
+
+    <article class="metric">
+        <span>Variáveis</span>
+        <strong id="a-cols">—</strong>
+        <small>Colunas disponíveis</small>
+    </article>
+
+    <article class="metric">
+        <span>Variáveis numéricas</span>
+        <strong id="a-numeric">—</strong>
+        <small>Variáveis utilizadas na correlação</small>
+    </article>
+</section>
+
+<section class="panel">
+    <p class="eyebrow">01 · DISTRIBUIÇÃO</p>
+    <h2>Distribuição das variáveis</h2>
+    <p>
+        Selecione uma característica para visualizar como seus valores
+        estão distribuídos entre os registros.
+    </p>
+
+    <div class="analysis-toolbar">
+        <label for="column-select">Variável analisada</label>
+        <select id="column-select"></select>
+        <span id="column-kind" class="analysis-chip">Carregando...</span>
+    </div>
+
+    <div id="distribution-explanation" class="analysis-explainer">
+        Carregando explicação...
+    </div>
+
+    <div id="distribution" class="chart"></div>
+
+    <p id="distribution-footnote" class="chart-footnote"></p>
+</section>
+
+<section class="panel">
+    <p class="eyebrow">02 · RELACIONAMENTO ENTRE DADOS</p>
+    <h2>Matriz de correlação</h2>
+    <p>
+        Identifique quais características apresentam comportamentos
+        semelhantes ou opostos.
+    </p>
+
+    <div class="analysis-explainer">
+        <strong>Como interpretar os valores?</strong>
+        <ul>
+            <li><strong>Próximo de +1:</strong> associação positiva.</li>
+            <li><strong>Próximo de 0:</strong> pouca associação linear.</li>
+            <li><strong>Próximo de -1:</strong> associação negativa.</li>
+        </ul>
+        <p>
+            Quanto mais próximo dos extremos, mais forte é a associação linear.
+        </p>
+    </div>
+
+    <h3>Principais relações encontradas</h3>
+    <div id="correlation-insights" class="insight-list"></div>
+
+    <div id="correlation" class="chart correlation-chart"></div>
+
+    <p class="chart-footnote">
+        A matriz utiliza o coeficiente de Pearson entre variáveis numéricas.
+        Identificadores, datas e categorias não participam desse cálculo.
+    </p>
+</section>
+
+<section class="panel">
+    <p class="eyebrow">03 · CONFERÊNCIA DOS DADOS</p>
+    <h2>Prévia da base carregada</h2>
+    <p>
+        Confira uma amostra dos registros importados e verifique
+        se os valores foram interpretados corretamente.
+    </p>
+
+    <div id="data-quality" class="quality-summary"></div>
+
+    <div class="table-wrap">
+        <table id="preview"></table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+{% endblock %}
