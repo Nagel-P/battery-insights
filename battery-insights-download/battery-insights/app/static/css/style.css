@@ -149,3 +149,230 @@
         min-height: 340px;
     }
 }
+
+/* ==========================================
+   MACHINE LEARNING - EXPLICAÇÕES E FLUXO
+========================================== */
+
+.ml-three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.ml-three article,
+.ml-metric-list article {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #0c1425;
+}
+
+.ml-three h3 {
+  margin: 8px 0;
+  font-size: 16px;
+}
+
+.ml-three p,
+.ml-metric-list p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ml-step {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.ml-note,
+.ml-help,
+.ml-detail {
+  padding: 16px 18px;
+  border: 1px solid rgba(100, 224, 189, .2);
+  border-radius: 12px;
+  background: rgba(100, 224, 189, .055);
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 16px 0;
+}
+
+.ml-note strong,
+.ml-help strong,
+.ml-detail strong {
+  color: var(--accent);
+}
+
+.ml-help ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.ml-help li {
+  margin: 6px 0;
+}
+
+.ml-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.ml-section-heading h2 {
+  margin-bottom: 10px;
+}
+
+.ml-tag {
+  font-size: 12px;
+  color: var(--accent);
+  border: 1px solid rgba(100, 224, 189, .25);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+
+.form-grid small {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.ml-detail p {
+  margin: 6px 0;
+}
+
+.ml-detail small {
+  color: var(--muted);
+}
+
+.ml-parameters {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 20px;
+}
+
+.ml-parameters h3 {
+  margin-bottom: 4px;
+}
+
+.ml-parameters > p {
+  font-size: 13px;
+  margin-top: 0;
+}
+
+.ml-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.button-secondary {
+  background: #273650;
+  color: var(--text);
+  border: 1px solid #40516f;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.metric-chip small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 7px;
+}
+
+.ml-metric-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.ml-metric-list b {
+  color: var(--accent);
+}
+
+.ml-prediction-result {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid rgba(100, 224, 189, .3);
+  border-radius: 12px;
+  background: rgba(100, 224, 189, .06);
+}
+
+.ml-result-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.ml-result-value {
+  font-size: clamp(26px, 5vw, 38px);
+  font-weight: 800;
+  color: var(--accent);
+  margin: 4px 0 12px;
+}
+
+.ml-prediction-result > small {
+  display: block;
+  color: var(--muted);
+  margin-top: 14px;
+}
+
+.ml-probabilities {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ml-probabilities > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  font-size: 13px;
+}
+
+.ml-probability-track {
+  grid-column: 1 / -1;
+  height: 7px;
+  border-radius: 9px;
+  background: #273650;
+  overflow: hidden;
+}
+
+.ml-probability-track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 9px;
+}
+
+#confusion-wrap {
+  margin-top: 22px;
+}
+
+#confusion-wrap h3 {
+  margin-bottom: 4px;
+}
+
+#confusion-matrix td {
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .ml-three,
+  .ml-metric-list {
+    grid-template-columns: 1fr;
+  }
+
+  .ml-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

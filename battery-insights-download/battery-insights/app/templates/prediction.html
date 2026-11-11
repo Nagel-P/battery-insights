@@ -1,1 +1,203 @@
-{% extends 'base.html' %}{% block content %}<section class="page-heading"><p class="eyebrow">MODELOS PREDITIVOS</p><h1>Laboratório de Machine Learning</h1><p>Configure o algoritmo, treine novamente com a base ativa e consulte métricas e predições.</p></section><section class="panel"><h2>Configuração e treinamento</h2><div class="form-grid"><label>Tipo de tarefa<select id="kind"><option value="regression">Regressão · Saúde (SOH)</option><option value="classification">Classificação · Risco de falha</option><option value="clustering">Clusterização · Perfil de desgaste</option></select></label><label>Algoritmo<select id="algorithm"><option value="random_forest">Random Forest</option><option value="decision_tree">Decision Tree</option><option value="extra_trees">Extra Trees</option><option value="gradient_boosting">Gradient Boosting</option><option value="knn">K-Nearest Neighbors (KNN)</option></select></label><label id="target-wrap">Variável alvo<input id="target" value="state_of_health_pct"></label><label>Profundidade máxima<input id="max-depth" type="number" min="1" placeholder="Padrão do algoritmo"></label><label id="estimators-wrap">Número de árvores<input id="estimators" type="number" min="10" value="100"></label><label id="neighbors-wrap" class="hidden">Número de vizinhos<input id="neighbors" type="number" min="1" value="5"></label><label id="clusters-wrap" class="hidden">Número de clusters<input id="clusters" type="number" min="2" max="12" value="4"></label></div><button id="train-button">Treinar / retreinar modelo</button><p id="train-message" class="message"></p></section><section class="panel"><h2>Resultado da avaliação</h2><div id="metrics" class="metrics-grid muted">Treine um modelo para visualizar as métricas.</div></section><section class="panel" id="predict-panel"><h2>Realizar predição</h2><p class="muted">Informe os atributos utilizados no treinamento. Campos não informados serão tratados pelo pré-processamento.</p><div id="prediction-fields" class="form-grid"></div><button id="predict-button">Executar predição</button><div id="prediction-result" class="result"></div></section>{% endblock %}{% block scripts %}<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-heading">
+  <p class="eyebrow">MODELOS PREDITIVOS</p>
+  <h1>Laboratório de Machine Learning</h1>
+  <p>Treine algoritmos com a base carregada, compare seu desempenho e use o modelo treinado para analisar uma bateria.</p>
+</section>
+
+<section class="panel ml-intro">
+  <h2>Como funciona esta página?</h2>
+  <div class="ml-three">
+    <article>
+      <span class="ml-step">01 · CONFIGURAR</span>
+      <h3>Escolha o que deseja descobrir</h3>
+      <p>Defina se quer estimar um valor, classificar o risco ou encontrar grupos de baterias semelhantes.</p>
+    </article>
+    <article>
+      <span class="ml-step">02 · TREINAR</span>
+      <h3>Ensine o algoritmo</h3>
+      <p>O sistema aprende padrões da base ativa. Uma parte dos dados é reservada para testar o modelo.</p>
+    </article>
+    <article>
+      <span class="ml-step">03 · UTILIZAR</span>
+      <h3>Faça uma previsão</h3>
+      <p>Depois do treinamento, informe os dados de uma bateria para receber uma estimativa ou classificação.</p>
+    </article>
+  </div>
+  <div class="ml-note">
+    <strong>Treinar não é o mesmo que prever:</strong>
+    treinar é aprender com exemplos históricos; prever é aplicar o que foi aprendido a novos valores informados por você.
+  </div>
+</section>
+
+<section class="panel">
+  <div class="ml-section-heading">
+    <div>
+      <p class="eyebrow">ETAPA 1</p>
+      <h2>Configuração e treinamento</h2>
+    </div>
+    <span class="ml-tag">Use a base atualmente carregada</span>
+  </div>
+
+  <div class="ml-help">
+    <strong>Qual tarefa devo escolher?</strong>
+    <ul>
+      <li><b>Regressão:</b> quando a resposta esperada é um número. Ex.: saúde atual (%) ou ciclos restantes.</li>
+      <li><b>Classificação:</b> quando a resposta esperada é uma categoria. Ex.: risco baixo, médio ou alto.</li>
+      <li><b>Clusterização:</b> quando deseja descobrir grupos de baterias parecidas sem informar uma categoria correta.</li>
+    </ul>
+  </div>
+
+  <div class="form-grid">
+    <label>Tipo de tarefa
+      <select id="kind">
+        <option value="regression">Regressão · prever um valor</option>
+        <option value="classification">Classificação · prever uma categoria</option>
+        <option value="clustering">Clusterização · encontrar grupos</option>
+      </select>
+      <small id="kind-help">Estima um valor numérico, como o percentual de saúde da bateria.</small>
+    </label>
+
+    <label id="algorithm-wrap">Algoritmo
+      <select id="algorithm"></select>
+      <small id="algorithm-help">Selecione um algoritmo para ver como ele aprende.</small>
+    </label>
+
+    <label id="target-wrap">O que deseja prever?
+      <select id="target">
+        <option value="state_of_health_pct">Saúde da bateria (state_of_health_pct)</option>
+        <option value="remaining_useful_life_cycles">Ciclos de vida útil restantes (remaining_useful_life_cycles)</option>
+      </select>
+      <small>Esta é a resposta que o modelo tentará aprender a estimar.</small>
+    </label>
+
+    <label id="clusters-wrap" class="hidden">Quantidade de grupos (clusters)
+      <input id="clusters" type="number" min="2" max="12" value="4">
+      <small>Quantos perfis diferentes o K-Means deve tentar encontrar.</small>
+    </label>
+  </div>
+
+  <div id="algorithm-detail" class="ml-detail"></div>
+
+  <div id="parameters-panel" class="ml-parameters">
+    <h3>Parâmetros do algoritmo</h3>
+    <p>Os parâmetros controlam como o algoritmo aprende. Você pode manter os valores sugeridos para começar.</p>
+
+    <div class="form-grid">
+      <label id="estimators-wrap">Número de árvores
+        <input id="estimators" type="number" min="10" max="1000" value="100">
+        <small id="estimators-help">Quantidade de árvores usadas pelo modelo.</small>
+      </label>
+
+      <label id="max-depth-wrap">Profundidade máxima
+        <input id="max-depth" type="number" min="1" max="100" placeholder="Padrão do algoritmo">
+        <small>Limita quantos níveis de decisões cada árvore pode criar. Em branco, usa o padrão do algoritmo.</small>
+      </label>
+
+      <label id="neighbors-wrap" class="hidden">Número de vizinhos (K)
+        <input id="neighbors" type="number" min="1" max="50" value="5">
+        <small>Quantos exemplos próximos serão consultados pelo KNN.</small>
+      </label>
+
+      <label id="learning-rate-wrap" class="hidden">Taxa de aprendizado
+        <input id="learning-rate" type="number" min="0.001" max="1" step="0.01" value="0.1">
+        <small>Controla o peso de cada etapa de aprendizado no Gradient Boosting.</small>
+      </label>
+    </div>
+  </div>
+
+  <button id="train-button">Treinar modelo</button>
+  <p id="train-message" class="message" role="status"></p>
+</section>
+
+<section class="panel">
+  <p class="eyebrow">ETAPA 2</p>
+  <h2>Resultado da avaliação</h2>
+  <p>O modelo é avaliado com registros que não foram usados para ensiná-lo. Assim temos uma estimativa de como ele pode se comportar diante de dados que ainda não viu.</p>
+
+  <div id="metrics" class="metrics-grid muted">
+    Configure e treine um modelo para visualizar os resultados.
+  </div>
+
+  <div id="metrics-explanation" class="ml-help hidden"></div>
+
+  <div id="confusion-wrap" class="hidden">
+    <h3>Matriz de confusão</h3>
+    <p class="muted">Compara a categoria real com a categoria prevista. Valores na diagonal representam acertos.</p>
+    <div id="confusion-matrix" class="table-wrap"></div>
+  </div>
+
+  <div id="cluster-explanation" class="ml-help hidden"></div>
+</section>
+
+<section class="panel" id="predict-panel">
+  <p class="eyebrow">ETAPA 3</p>
+  <h2>Use o modelo para fazer uma previsão</h2>
+  <p>Esta área só fica disponível depois que o treinamento termina. Os campos são montados de acordo com as variáveis que o modelo realmente utilizou.</p>
+
+  <div class="ml-note">
+    <strong>Como preencher?</strong>
+    Informe os dados conhecidos da bateria que deseja analisar. Para testar a página, use o botão de exemplo. Os valores de exemplo são fictícios e servem apenas para demonstrar o funcionamento.
+  </div>
+
+  <div id="prediction-fields" class="form-grid"></div>
+
+  <div class="ml-actions">
+    <button type="button" class="button-secondary" id="example-button">Preencher exemplo</button>
+    <button id="predict-button" disabled>Executar previsão</button>
+  </div>
+
+  <p id="prediction-message" class="message" role="status"></p>
+  <div id="prediction-result" class="ml-prediction-result" aria-live="polite"></div>
+</section>
+
+<section class="panel">
+  <p class="eyebrow">CONSULTA RÁPIDA</p>
+  <h2>Entenda as métricas</h2>
+
+  <div class="ml-metric-list">
+    <article>
+      <b>MAE</b>
+      <p>Erro absoluto médio. Mostra, em média, quanto a previsão numérica ficou distante do valor real. Quanto menor, melhor.</p>
+    </article>
+    <article>
+      <b>RMSE</b>
+      <p>Também mede erro numérico, mas penaliza mais os erros grandes. Quanto menor, melhor.</p>
+    </article>
+    <article>
+      <b>R²</b>
+      <p>Indica quanto da variação do resultado o modelo explica. Quanto mais próximo de 1, melhor; pode ser negativo.</p>
+    </article>
+    <article>
+      <b>Accuracy</b>
+      <p>Proporção total de classificações corretas. Pode esconder problemas quando uma classe aparece muito mais que as outras.</p>
+    </article>
+    <article>
+      <b>Precision</b>
+      <p>Quando o modelo prevê uma classe, quantas dessas previsões estão corretas?</p>
+    </article>
+    <article>
+      <b>Recall</b>
+      <p>De todos os casos que realmente pertencem a uma classe, quantos o modelo conseguiu encontrar?</p>
+    </article>
+    <article>
+      <b>F1-score</b>
+      <p>Combina Precision e Recall. Ajuda a comparar modelos sem olhar apenas a taxa geral de acerto.</p>
+    </article>
+    <article>
+      <b>Inertia</b>
+      <p>Na clusterização, mede a soma das distâncias dos pontos aos centros dos grupos. Sozinha, não prova que os grupos são bons.</p>
+    </article>
+  </div>
+
+  <div class="ml-note">
+    <strong>Atenção:</strong>
+    métricas altas não garantem previsões corretas no mundo real. Este projeto usa uma base de demonstração; os resultados dependem da qualidade e representatividade dos dados.
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+{% endblock %}
